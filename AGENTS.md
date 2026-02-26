@@ -56,6 +56,28 @@ Use:
 
 This policy is intentional: changes should not be left unbuilt or unpushed.
 
+## Content workflow (posts + images)
+
+### Add a new post
+1. Scaffold a post file:
+   - `make new-post TITLE="My Post Title" CATEGORIES=interviews`
+   - Optional: `SLUG=... DATE="YYYY-MM-DD HH:MM:SS -0500" IMAGE=/assets/foo.webp LINK=https://...`
+2. Edit the created file in `_posts/YYYY-MM-DD-slug.markdown`.
+3. Ship:
+   - `make ship MSG="post: My Post Title"`
+
+### Add a new image (optimized + cropped)
+1. One-time install of image tooling (local):
+   - `make img-tools`
+2. Import/convert/crop:
+   - Post header / general: `make img SRC=/path/to/input.jpg NAME=my-image PRESET=long`
+   - Fiction card / square: `make img SRC=/path/to/input.jpg NAME=my-image PRESET=square`
+3. Use the printed snippet:
+   - Post header front matter: `image: "/assets/my-image.webp"`
+   - Inline markdown: `![](/assets/my-image.webp)`
+4. Ship:
+   - `make ship MSG="assets: add my-image"`
+
 ## Make targets (canonical workflow)
 - `make doctor`: sanity-check toolchain + git branch.
 - `make install`: install Ruby gems (Bundler) + Node deps + Playwright Chromium.
@@ -63,5 +85,8 @@ This policy is intentional: changes should not be left unbuilt or unpushed.
 - `make serve`: run local dev server at `http://127.0.0.1:4000`.
 - `make open`: open the local server URL in your browser.
 - `make shot PAGE=/`: take a screenshot of a path using a temporary server.
+- `make img-tools`: install ImageMagick via Homebrew (required for `make img`).
+- `make img SRC=...`: import an image into `assets/` as a web-friendly format (default: WebP).
+- `make new-post TITLE="..."`: scaffold a new post in `_posts/`.
 - `make watch SHA=...`: wait for the production Pages deploy run for a commit SHA; prints run + production URLs.
 - `make ship MSG="..."`: build + commit + push to `origin/master` (supports `DRY_RUN=1`).

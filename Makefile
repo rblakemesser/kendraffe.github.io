@@ -13,6 +13,7 @@ COPY_CNAME ?= 0
 
 .PHONY: doctor install build serve open shot ship deploy-prod watch
 .PHONY: watch
+.PHONY: img-tools img new-post
 
 doctor:
 	@set -euo pipefail; \
@@ -22,6 +23,7 @@ doctor:
 	echo "npm: $$(npm -v)"; \
 	echo "git: $$(git --version)"; \
 	echo "gh: $$(gh --version | head -n 1)"; \
+	if command -v magick >/dev/null 2>&1; then echo "magick: $$(magick -version | head -n 1)"; else echo "magick: (missing)"; fi; \
 	gh auth status -h github.com >/dev/null; \
 	branch="$$(git rev-parse --abbrev-ref HEAD)"; \
 	if [[ "$$branch" != "master" ]]; then \
@@ -73,6 +75,33 @@ shot:
 	fi; \
 	echo "==> screenshot $(BASE_URL)$${PAGE}"; \
 	node tools/shot.mjs --host "$(HOST)" --port "$(PORT)" --path "$${PAGE}"
+
+img-tools:
+	@set -euo pipefail; \
+	if ! command -v brew >/dev/null 2>&1; then \
+	  echo "ERROR: Homebrew is required for image tooling (brew)"; \
+	  exit 1; \
+	fi; \
+	echo "==> brew install imagemagick"; \
+	brew install imagemagick
+
+img:
+	@set -euo pipefail; \
+	if [[ -z "$${SRC:-}" ]]; then \
+	  echo "ERROR: provide SRC=/path/to/image"; \
+	  echo "       optional: NAME=slug PRESET=long|square FMT=webp QUALITY=82 FORCE=1"; \
+	  exit 1; \
+	fi; \
+	tools/img.sh
+
+new-post:
+	@set -euo pipefail; \
+	if [[ -z "$${TITLE:-}" ]]; then \
+	  echo "ERROR: provide TITLE=\"Post title\""; \
+	  echo "       optional: SLUG=... DATE=\"YYYY-MM-DD HH:MM:SS -0500\" CATEGORIES=... IMAGE=/assets/foo.webp LINK=https://..."; \
+	  exit 1; \
+	fi; \
+	tools/new-post.sh
 
 ship:
 	@set -euo pipefail; \
