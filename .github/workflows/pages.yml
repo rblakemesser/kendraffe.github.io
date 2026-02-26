@@ -33,7 +33,6 @@ jobs:
       - name: Build
         run: |
           bundle exec jekyll build -d _site
-          if [ -f CNAME ]; then cp CNAME _site/CNAME; fi
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -50,4 +49,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-

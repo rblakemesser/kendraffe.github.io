@@ -32,6 +32,7 @@
 ### Jekyll version
 - Local + CI builds are pinned via Bundler to Jekyll `4.4.1`.
 - Do not rely on GitHub Pages' built-in Jekyll stack (it is pinned and older); deployment uses GitHub Actions.
+- Production is `https://rblakemesser.github.io/` (deployed via `rblakemesser/rblakemesser.github.io` workflow `kendraffe.yml`).
 
 ### Screenshot-first page inspection
 When asked about the structure/content on any page:
@@ -46,8 +47,9 @@ For every requested change, automatically:
 1. Build the site
 2. Commit changes
 3. Push to `origin/master`
-4. Watch the resulting GitHub Actions deploy run until it finishes
-5. Post the GitHub Actions run link and the production site link
+4. Trigger the production deploy workflow
+5. Watch the resulting GitHub Actions deploy run until it finishes
+6. Post the GitHub Actions run link and the production site link
 
 Use:
 - `make ship MSG="describe the change"`
@@ -57,9 +59,9 @@ This policy is intentional: changes should not be left unbuilt or unpushed.
 ## Make targets (canonical workflow)
 - `make doctor`: sanity-check toolchain + git branch.
 - `make install`: install Ruby gems (Bundler) + Node deps + Playwright Chromium.
-- `make build`: build to `_site/` and ensure `_site/CNAME` exists.
+- `make build`: build to `_site/` (set `COPY_CNAME=1` to include `CNAME` as `_site/CNAME`).
 - `make serve`: run local dev server at `http://127.0.0.1:4000`.
 - `make open`: open the local server URL in your browser.
 - `make shot PAGE=/`: take a screenshot of a path using a temporary server.
-- `make watch SHA=...`: wait for the Pages deploy run for a commit SHA; prints run + production URLs.
+- `make watch SHA=...`: wait for the production Pages deploy run for a commit SHA; prints run + production URLs.
 - `make ship MSG="..."`: build + commit + push to `origin/master` (supports `DRY_RUN=1`).

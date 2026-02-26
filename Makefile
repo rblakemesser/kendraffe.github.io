@@ -4,10 +4,14 @@ HOST ?= 127.0.0.1
 PORT ?= 4000
 BASE_URL := http://$(HOST):$(PORT)
 
+PROD_REPO ?= rblakemesser/rblakemesser.github.io
+PROD_WORKFLOW ?= kendraffe.yml
+
 BUNDLE_PATH := vendor/bundle
 NPM := npm
+COPY_CNAME ?= 0
 
-.PHONY: doctor install build serve open shot ship
+.PHONY: doctor install build serve open shot ship deploy-prod watch
 .PHONY: watch
 
 doctor:
@@ -25,7 +29,8 @@ doctor:
 	  exit 1; \
 	fi; \
 	echo "branch: $$branch"; \
-	echo "remote: origin -> $$(git remote get-url origin)"
+	echo "remote: origin -> $$(git remote get-url origin)"; \
+	echo "production: $(PROD_REPO) ($(PROD_WORKFLOW))"
 
 install:
 	@set -euo pipefail; \
@@ -45,7 +50,7 @@ build:
 	@set -euo pipefail; \
 	echo "==> jekyll build"; \
 	BUNDLE_PATH="$(BUNDLE_PATH)" bundle exec jekyll build -d _site; \
-	if [[ -f CNAME ]]; then \
+	if [[ "$(COPY_CNAME)" == "1" && -f CNAME ]]; then \
 	  cp CNAME _site/CNAME; \
 	fi; \
 	echo "built: _site/"
@@ -90,28 +95,37 @@ ship:
 	echo "==> git commit"; \
 	git commit -m "$$msg"; \
 	echo "==> git push origin master"; \
-	git push origin master
+	git push origin master; \
 	sha="$$(git rev-parse HEAD)"; \
+	$(MAKE) deploy-prod SHA="$$sha"; \
 	$(MAKE) watch SHA="$$sha"
+
+deploy-prod:
+	@set -euo pipefail; \
+	sha="$${SHA:-$$(git rev-parse HEAD)}"; \
+	echo "==> trigger production deploy for $$sha"; \
+	gh workflow run -R "$(PROD_REPO)" "$(PROD_WORKFLOW)" --ref master -f source_sha="$$sha"
 
 watch:
 	@set -euo pipefail; \
 	sha="$${SHA:-$$(git rev-parse HEAD)}"; \
-	repo="$$(gh repo view --json nameWithOwner -q .nameWithOwner)"; \
-	echo "==> locate Pages run for $$sha"; \
+	repo="$(PROD_REPO)"; \
+	workflow="$(PROD_WORKFLOW)"; \
+	expected="kendraffe@$$sha"; \
+	echo "==> locate production Pages run for $$expected"; \
 	run_id=""; \
 	for _ in $$(seq 1 60); do \
-	  run_id="$$(gh run list --workflow pages.yml --branch master -L 20 --json databaseId,headSha --jq '.[] | select(.headSha == "'"$$sha"'") | .databaseId' | head -n 1 || true)"; \
+	  run_id="$$(gh run list -R "$$repo" --workflow "$$workflow" --event workflow_dispatch -L 50 --json databaseId,displayTitle --jq '.[] | select(.displayTitle == "'"$$expected"'") | .databaseId' | head -n 1 || true)"; \
 	  if [[ -n "$$run_id" ]]; then break; fi; \
 	  sleep 2; \
 	done; \
 	if [[ -z "$$run_id" ]]; then \
-	  echo "ERROR: could not find a Pages run for $$sha"; \
+	  echo "ERROR: could not find a production Pages run for $$expected"; \
 	  exit 1; \
 	fi; \
 	run_url="https://github.com/$$repo/actions/runs/$$run_id"; \
 	echo "==> watch: $$run_url"; \
-	gh run watch "$$run_id" --exit-status; \
+	gh run watch -R "$$repo" "$$run_id" --exit-status; \
 	pages_url="$$(gh api -H "Accept: application/vnd.github+json" "repos/$$repo/pages" --jq '.html_url')"; \
 	echo "run: $$run_url"; \
 	echo "production: $$pages_url"
