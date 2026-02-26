@@ -46,6 +46,8 @@ For every requested change, automatically:
 1. Build the site
 2. Commit changes
 3. Push to `origin/master`
+4. Watch the resulting GitHub Actions deploy run until it finishes
+5. Post the GitHub Actions run link and the production site link
 
 Use:
 - `make ship MSG="describe the change"`
@@ -59,4 +61,5 @@ This policy is intentional: changes should not be left unbuilt or unpushed.
 - `make serve`: run local dev server at `http://127.0.0.1:4000`.
 - `make open`: open the local server URL in your browser.
 - `make shot PAGE=/`: take a screenshot of a path using a temporary server.
+- `make watch SHA=...`: wait for the Pages deploy run for a commit SHA; prints run + production URLs.
 - `make ship MSG="..."`: build + commit + push to `origin/master` (supports `DRY_RUN=1`).

@@ -8,6 +8,7 @@ BUNDLE_PATH := vendor/bundle
 NPM := npm
 
 .PHONY: doctor install build serve open shot ship
+.PHONY: watch
 
 doctor:
 	@set -euo pipefail; \
@@ -16,6 +17,8 @@ doctor:
 	echo "node: $$(node -v)"; \
 	echo "npm: $$(npm -v)"; \
 	echo "git: $$(git --version)"; \
+	echo "gh: $$(gh --version | head -n 1)"; \
+	gh auth status -h github.com >/dev/null; \
 	branch="$$(git rev-parse --abbrev-ref HEAD)"; \
 	if [[ "$$branch" != "master" ]]; then \
 	  echo "ERROR: expected branch 'master' (got '$$branch')"; \
@@ -88,3 +91,27 @@ ship:
 	git commit -m "$$msg"; \
 	echo "==> git push origin master"; \
 	git push origin master
+	sha="$$(git rev-parse HEAD)"; \
+	$(MAKE) watch SHA="$$sha"
+
+watch:
+	@set -euo pipefail; \
+	sha="$${SHA:-$$(git rev-parse HEAD)}"; \
+	repo="$$(gh repo view --json nameWithOwner -q .nameWithOwner)"; \
+	echo "==> locate Pages run for $$sha"; \
+	run_id=""; \
+	for _ in $$(seq 1 60); do \
+	  run_id="$$(gh run list --workflow pages.yml --branch master -L 20 --json databaseId,headSha --jq ".[] | select(.headSha == \\\"$$sha\\\") | .databaseId" | head -n 1 || true)"; \
+	  if [[ -n "$$run_id" ]]; then break; fi; \
+	  sleep 2; \
+	done; \
+	if [[ -z "$$run_id" ]]; then \
+	  echo "ERROR: could not find a Pages run for $$sha"; \
+	  exit 1; \
+	fi; \
+	run_url="https://github.com/$$repo/actions/runs/$$run_id"; \
+	echo "==> watch: $$run_url"; \
+	gh run watch "$$run_id" --exit-status; \
+	pages_url="$$(gh api -H \"Accept: application/vnd.github+json\" \"repos/$$repo/pages\" --jq '.html_url')"; \
+	echo "run: $$run_url"; \
+	echo "production: $$pages_url"
