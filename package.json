@@ -1,0 +1,9 @@
+{
+  "name": "kendraffe-github-io-tools",
+  "private": true,
+  "description": "Local tooling (Playwright screenshots) for the Jekyll site.",
+  "devDependencies": {
+    "playwright": "1.51.1"
+  }
+}
+
