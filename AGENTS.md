@@ -70,8 +70,9 @@ This policy is intentional: changes should not be left unbuilt or unpushed.
 1. One-time install of image tooling (local):
    - `make img-tools`
 2. Import/convert/crop:
-   - Post header / general: `make img SRC=/path/to/input.jpg NAME=my-image PRESET=long`
-   - Fiction card / square: `make img SRC=/path/to/input.jpg NAME=my-image PRESET=square`
+   - Post header / general (banner 681×300): `make img SRC=/path/to/input.jpg NAME=my-image PRESET=long`
+   - Fiction card / square (300×300): `make img SRC=/path/to/input.jpg NAME=my-image PRESET=square`
+   - Optional tuning: `WIDTH=... HEIGHT=... GRAVITY=north|center|south QUALITY=...`
 3. Use the printed snippet:
    - Post header front matter: `image: "/assets/my-image.webp"`
    - Inline markdown: `![](/assets/my-image.webp)`

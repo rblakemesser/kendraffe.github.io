@@ -66,14 +66,15 @@ height="${HEIGHT:-}"
 
 case "$preset" in
   long | post)
-    width="${width:-1362}"
+    width="${width:-681}"
+    height="${height:-300}"
     ;;
   inline)
     width="${width:-1362}"
     ;;
   square | fiction)
-    width="${width:-652}"
-    height="${height:-652}"
+    width="${width:-300}"
+    height="${height:-300}"
     ;;
   *)
     echo "ERROR: unknown PRESET: $preset (expected long|inline|square)" >&2
