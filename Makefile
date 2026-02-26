@@ -101,7 +101,7 @@ watch:
 	echo "==> locate Pages run for $$sha"; \
 	run_id=""; \
 	for _ in $$(seq 1 60); do \
-	  run_id="$$(gh run list --workflow pages.yml --branch master -L 20 --json databaseId,headSha --jq ".[] | select(.headSha == \\\"$$sha\\\") | .databaseId" | head -n 1 || true)"; \
+	  run_id="$$(gh run list --workflow pages.yml --branch master -L 20 --json databaseId,headSha --jq '.[] | select(.headSha == "'"$$sha"'") | .databaseId' | head -n 1 || true)"; \
 	  if [[ -n "$$run_id" ]]; then break; fi; \
 	  sleep 2; \
 	done; \
@@ -112,6 +112,6 @@ watch:
 	run_url="https://github.com/$$repo/actions/runs/$$run_id"; \
 	echo "==> watch: $$run_url"; \
 	gh run watch "$$run_id" --exit-status; \
-	pages_url="$$(gh api -H \"Accept: application/vnd.github+json\" \"repos/$$repo/pages\" --jq '.html_url')"; \
+	pages_url="$$(gh api -H "Accept: application/vnd.github+json" "repos/$$repo/pages" --jq '.html_url')"; \
 	echo "run: $$run_url"; \
 	echo "production: $$pages_url"
