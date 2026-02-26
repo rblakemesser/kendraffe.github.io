@@ -89,7 +89,7 @@ img:
 	@set -euo pipefail; \
 	if [[ -z "$${SRC:-}" ]]; then \
 	  echo "ERROR: provide SRC=/path/to/image"; \
-	  echo "       optional: NAME=slug PRESET=long|square FMT=webp QUALITY=82 FORCE=1"; \
+	  echo "       optional: NAME=slug PRESET=long|square|inline FMT=webp QUALITY=82 FORCE=1"; \
 	  exit 1; \
 	fi; \
 	tools/img.sh

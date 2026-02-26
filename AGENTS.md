@@ -72,6 +72,7 @@ This policy is intentional: changes should not be left unbuilt or unpushed.
 2. Import/convert/crop:
    - Post header / general (banner 681×300): `make img SRC=/path/to/input.jpg NAME=my-image PRESET=long`
    - Fiction card / square (300×300): `make img SRC=/path/to/input.jpg NAME=my-image PRESET=square`
+   - Inline image (max width): `make img SRC=/path/to/input.jpg NAME=my-image PRESET=inline`
    - Optional tuning: `WIDTH=... HEIGHT=... GRAVITY=north|center|south QUALITY=...`
 3. Use the printed snippet:
    - Post header front matter: `image: "/assets/my-image.webp"`
